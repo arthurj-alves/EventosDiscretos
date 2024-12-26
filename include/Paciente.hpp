@@ -5,39 +5,37 @@
 
 class Paciente {
 private:
-    int id;                 // Identificador único do paciente
-    int alta;               // Indicador de alta (0 = não, 1 = sim)
-    int grauUrgencia;       // Grau de urgência (0 = verde, 1 = amarelo, 2 = vermelho)
-    int medidasHospitalares; // Número de medidas hospitalares
-    int testesLaboratorio;   // Número de testes de laboratório
-    int examesImagem;        // Número de exames de imagem
-    int instrumentosMedicamentos; // Número de instrumentos/medicamentos
-    double tempoEspera;      // Tempo total em filas
-    double tempoAtendimento; // Tempo total sendo atendido
-    int estadoAtual;         // Estado atual do paciente (0 a 14)
+    std::string id; // Identificador único do paciente
+    bool alta; // Indica se teve alta após o atendimento
+    int anoAdmissao, mesAdmissao, diaAdmissao, horaAdmissao; // Data e hora de admissão
+    int grauUrgencia; // Grau de urgência: 0 - Verde, 1 - Amarelo, 2 - Vermelho
+    int medidasHospitalares, testesLaboratorio, examesImagem, instrumentosMedicamentos; // Quantidades de procedimentos
+    
+    
+    // Estatística
+    double tempoEspera; // Tempo total em espera
+    double tempoPermanencia; // Tempo total no hospital (triagem + atendimento + procedimentos)
+    double tempoTotal; // Tempo total no hospital (permanência + espera)
+
+    // Hora de saída
+    int anoSaida, mesSaida, diaSaida, horaSaida, minutoSaida;
 
 public:
-    // Construtor padrão
-    Paciente();
+    // Construtor
+    Paciente(const std::string& id, bool alta, int ano, int mes, int dia, int hora, 
+             int grau, int mh, int tl, int ei, int im);
 
-    // Construtor parametrizado
-    Paciente(int id, int alta, int grauUrgencia, int medidas, int testes, int exames, int instrumentos);
+    // Métodos para calcular tempos
+    void calcularTempos(double tempoTriagem, double tempoAtendimento, double tempoMH,
+                        double tempoTL, double tempoEI, double tempoIM);
 
-    // Métodos de acesso (getters)
-    int getId() const;
-    int getAlta() const;
-    int getGrauUrgencia() const;
-    int getEstadoAtual() const;
+    // Getters
     double getTempoEspera() const;
-    double getTempoAtendimento() const;
-
-    // Métodos de modificação (setters)
-    void setEstadoAtual(int novoEstado);
-    void adicionarTempoEspera(double tempo);
-    void adicionarTempoAtendimento(double tempo);
-
-    // Método para exibir informações do paciente (para debug)
-    void exibirInformacoes() const;
+    double getTempoPermanencia() const;
+    double getTempoTotal() const;
+    
+    // Função para escrever o output do paciente
+    void escreverOutput() const;
 };
 
-#endif // PACIENTE_HPP
+#endif
