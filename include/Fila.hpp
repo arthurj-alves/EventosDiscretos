@@ -1,33 +1,40 @@
-// Arquivo: Fila.hpp
 #ifndef FILA_HPP
 #define FILA_HPP
 
 #include "Paciente.hpp"
-
-class NodeFila {
-public:
-    Paciente paciente; // Paciente armazenado no nó
-    NodeFila* proximo; // Ponteiro para o próximo nó
-
-    NodeFila(const Paciente& p) : paciente(p), proximo(nullptr) {}
-};
+#include <stdexcept>
 
 class Fila {
 private:
-    NodeFila* frente;  // Ponteiro para o início da fila
-    NodeFila* traseira; // Ponteiro para o fim da fila
-    int tamanho;       // Número de elementos na fila
+    struct Nodo {
+        Paciente* paciente;
+        Nodo* proximo;
+
+        Nodo(Paciente* p) : paciente(p), proximo(nullptr) {}
+    };
+
+    Nodo* inicio;
+    Nodo* fim;
+    int tamanho;
 
 public:
-    // Construtor e destrutor
+    // Construtor
     Fila();
+
+    // Destrutor
     ~Fila();
 
-    // Operações principais
-    void enfileirar(const Paciente& p); // Adiciona um paciente à fila
-    Paciente desenfileirar();           // Remove e retorna o paciente da frente
-    bool estaVazia() const;             // Verifica se a fila está vazia
-    int getTamanho() const;             // Retorna o tamanho atual da fila
+    // Enfileira um paciente
+    void enfileira(Paciente* paciente);
+
+    // Desenfileira um paciente
+    Paciente* desenfileira();
+
+    // Verifica se a fila está vazia
+    bool filaVazia() const;
+
+    // Retorna o tamanho da fila
+    int getTamanho() const;
 };
 
-#endif // FILA_HPP
+#endif

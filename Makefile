@@ -8,11 +8,11 @@ OBJ_DIR = obj
 BIN_DIR = bin
 
 # Nome do executável
-EXECUTABLE = $(BIN_DIR)/teste
+EXECUTABLE = $(BIN_DIR)/main
 
 # Fontes e objetos
-SOURCES = $(SRC_DIR)/Teste.cpp $(SRC_DIR)/Paciente.cpp $(SRC_DIR)/Fila.cpp $(SRC_DIR)/Procedimento.cpp $(SRC_DIR)/SistemaEscalonamento.cpp
-OBJECTS = $(OBJ_DIR)/Teste.o $(OBJ_DIR)/Paciente.o $(OBJ_DIR)/Fila.o $(OBJ_DIR)/Procedimento.o $(OBJ_DIR)/SistemaEscalonamento.o
+SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/Paciente.cpp $(SRC_DIR)/Fila.cpp $(SRC_DIR)/Procedimento.cpp $(SRC_DIR)/Escalonador.cpp
+OBJECTS = $(OBJ_DIR)/main.o $(OBJ_DIR)/Paciente.o $(OBJ_DIR)/Fila.o $(OBJ_DIR)/Procedimento.o $(OBJ_DIR)/Escalonador.o
 
 # Regra padrão para compilar o executável
 all: $(EXECUTABLE)
@@ -23,9 +23,9 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS)
 
 # Regras para compilar os arquivos objeto
-$(OBJ_DIR)/Teste.o: $(SRC_DIR)/Teste.cpp include/Paciente.hpp include/Fila.hpp include/Procedimento.hpp include/SistemaEscalonamento.hpp
+$(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp include/Paciente.hpp include/Fila.hpp include/Procedimento.hpp include/Escalonador.hpp
 	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/Teste.cpp -o $@
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/main.cpp -o $@
 
 $(OBJ_DIR)/Paciente.o: $(SRC_DIR)/Paciente.cpp include/Paciente.hpp
 	@mkdir -p $(OBJ_DIR)
@@ -39,9 +39,9 @@ $(OBJ_DIR)/Procedimento.o: $(SRC_DIR)/Procedimento.cpp include/Procedimento.hpp
 	@mkdir -p $(OBJ_DIR)
 	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/Procedimento.cpp -o $@
 
-$(OBJ_DIR)/SistemaEscalonamento.o: $(SRC_DIR)/SistemaEscalonamento.cpp include/SistemaEscalonamento.hpp include/Paciente.hpp include/Fila.hpp include/Procedimento.hpp
+$(OBJ_DIR)/Escalonador.o: $(SRC_DIR)/Escalonador.cpp include/Escalonador.hpp include/Paciente.hpp include/Fila.hpp include/Procedimento.hpp
 	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/SistemaEscalonamento.cpp -o $@
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/Escalonador.cpp -o $@
 
 # Limpeza dos arquivos objeto e executável
 clean:

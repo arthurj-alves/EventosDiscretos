@@ -1,55 +1,67 @@
-// Arquivo: Fila.cpp
 #include "Fila.hpp"
 #include <iostream>
 
-// Construtor: inicializa uma fila vazia
-Fila::Fila() : frente(nullptr), traseira(nullptr), tamanho(0) {}
+// Construtor
+Fila::Fila() : inicio(nullptr), fim(nullptr), tamanho(0) {
+    
+    while (!filaVazia()) {
+        desenfileira();
+    }
 
-// Destrutor: remove todos os nós da fila
+    inicio = nullptr;
+    fim = nullptr;
+    tamanho = 0;
+}
+
+// Destrutor
 Fila::~Fila() {
-    while (!estaVazia()) {
-        desenfileirar();
+    while (!filaVazia()) {
+        desenfileira();
     }
 }
 
 // Enfileira um paciente
-void Fila::enfileirar(const Paciente& p) {
-    NodeFila* novoNo = new NodeFila(p);
-    if (estaVazia()) {
-        frente = traseira = novoNo;
+void Fila::enfileira(Paciente* paciente) {
+    if (!paciente) {
+        throw std::invalid_argument("Paciente nulo nao pode ser enfileirado.");
+    }
+
+    Nodo* novoNodo = new Nodo(paciente);
+    if (filaVazia()) {
+        inicio = novoNodo;
+        fim = novoNodo;
     } else {
-        traseira->proximo = novoNo;
-        traseira = novoNo;
+        fim->proximo = novoNodo;
+        fim = novoNodo;
     }
     tamanho++;
 }
 
 // Desenfileira um paciente
-Paciente Fila::desenfileirar() {
-    if (estaVazia()) {
-        std::cerr << "Erro: Tentativa de desenfileirar uma fila vazia!" << std::endl;
-        exit(EXIT_FAILURE); // Sai do programa em caso de erro
+Paciente* Fila::desenfileira() {
+    if (filaVazia()) {
+        throw std::underflow_error("Nao e possivel desenfileirar de uma fila vazia.");
     }
 
-    NodeFila* temp = frente;
-    Paciente p = temp->paciente;
-    frente = frente->proximo;
+    Nodo* nodoRemovido = inicio;
+    Paciente* paciente = nodoRemovido->paciente;
+    inicio = inicio->proximo;
 
-    if (frente == nullptr) { // Se a fila ficou vazia
-        traseira = nullptr;
+    if (!inicio) {
+        fim = nullptr;
     }
 
-    delete temp;
+    delete nodoRemovido;
     tamanho--;
-    return p;
+    return paciente;
 }
 
 // Verifica se a fila está vazia
-bool Fila::estaVazia() const {
-    return frente == nullptr;
+bool Fila::filaVazia() const {
+    return tamanho == 0;
 }
 
-// Retorna o tamanho atual da fila
+// Retorna o tamanho da fila
 int Fila::getTamanho() const {
     return tamanho;
 }

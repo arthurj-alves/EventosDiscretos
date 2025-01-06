@@ -6,32 +6,25 @@
 // Construtor
 Paciente::Paciente(const std::string& id, bool alta, int ano, int mes, int dia, int hora, 
                    int grau, int mh, int tl, int ei, int im) 
-    : id(id), alta(alta), anoAdmissao(ano), mesAdmissao(mes), diaAdmissao(dia), 
-      horaAdmissao(hora), grauUrgencia(grau), medidasHospitalares(mh), testesLaboratorio(tl), 
-      examesImagem(ei), instrumentosMedicamentos(im), tempoEspera(0), tempoPermanencia(0), 
-      anoSaida(ano), mesSaida(mes), diaSaida(dia), horaSaida(hora), minutoSaida(0) {}
+    : id(id), alta(alta), grauUrgencia(grau), medidasHospitalares(mh), testesLaboratorio(tl), 
+      examesImagem(ei), instrumentosMedicamentos(im), estadoAtual(0), tempoEspera(0), tempoPermanencia(0) {
 
-// Calcula os tempos com base nos parâmetros fornecidos
-void Paciente::calcularTempos(double tempoTriagem, double tempoAtendimento, double tempoMH,
-                              double tempoTL, double tempoEI, double tempoIM) {
-    tempoPermanencia = tempoTriagem + tempoAtendimento + 
-                       (medidasHospitalares * tempoMH) + 
-                       (testesLaboratorio * tempoTL) + 
-                       (examesImagem * tempoEI) + 
-                       (instrumentosMedicamentos * tempoIM);
-    tempoTotal = tempoPermanencia + tempoEspera;
+    tempoAdmissao[0] = ano;
+    tempoAdmissao[1] = mes;
+    tempoAdmissao[2] = dia;
+    tempoAdmissao[3] = hora;
 
-    // Calcula a data e hora de saída com base no tempo total
-    int totalMinutos = static_cast<int>(tempoTotal * 60);
-    int minutosSaida = totalMinutos % 60;
-    int totalHoras = totalMinutos / 60;
-    int horasSaida = totalHoras % 24;
-    int totalDias = totalHoras / 24;
+    estadoAtual = 2;
 
-    // Ajusta a data de saída
-    int dia = diaAdmissao + totalDias;
-    int mes = mesAdmissao;
-    int ano = anoAdmissao;
+    // Validar grau de urgência
+    if (grauUrgencia < 0 || grauUrgencia > 2) {
+        throw std::invalid_argument("Grau de urgência deve ser entre 0 e 2.");
+    }
+
+    // Validar data
+    if (ano < 0 || mes < 1 || mes > 12 || dia < 1 || dia > 31 || hora < 0 || hora > 23) {
+        throw std::invalid_argument("Data ou hora inválida.");
+    }
 
     // Array com o número de dias em cada mês (não considerando anos bissextos)
     int diasPorMes[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -41,7 +34,49 @@ void Paciente::calcularTempos(double tempoTriagem, double tempoAtendimento, doub
         diasPorMes[1] = 29;
     }
 
-    // Ajusta o dia, mês e ano de saída
+    if (dia > diasPorMes[mes - 1]) {
+        throw std::invalid_argument("Dia inválido para o mês especificado.");
+    }
+
+    // Validar atividades
+    if (mh < 0 || tl < 0 || ei < 0 || im < 0) {
+        throw std::invalid_argument("Valores de atividades não podem ser negativos.");
+    }
+}
+
+// Calcula os tempos com base nos parâmetros fornecidos
+void Paciente::calcularTempos(double tempoTriagem, double tempoAtendimento, double tempoMH,
+                              double tempoTL, double tempoEI, double tempoIM) {
+    // Calcula o tempo total de permanência
+    tempoPermanencia = tempoTriagem + tempoAtendimento + 
+                       (medidasHospitalares * tempoMH) + 
+                       (testesLaboratorio * tempoTL) + 
+                       (examesImagem * tempoEI) + 
+                       (instrumentosMedicamentos * tempoIM);
+
+    tempoTotal = tempoPermanencia + tempoEspera;
+
+    // Converte tempo total de horas para minutos
+    int totalMinutos = static_cast<int>(tempoTotal * 60);
+    int minutosExtras = totalMinutos % 60;  // Minutos restantes
+    int totalHoras = totalMinutos / 60;
+    int horasExtras = totalHoras % 24;      // Horas restantes
+    int diasExtras = totalHoras / 24;       // Dias inteiros adicionais
+
+    // Ajusta a data e hora de saída
+    int dia = tempoAdmissao[2] + diasExtras;
+    int mes = tempoAdmissao[1];
+    int ano = tempoAdmissao[0];
+
+    // Array com número de dias por mês
+    int diasPorMes[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+    // Ajusta para anos bissextos
+    if ((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0)) {
+        diasPorMes[1] = 29;
+    }
+
+    // Calcula a transição de dias, meses e anos
     while (dia > diasPorMes[mes - 1]) {
         dia -= diasPorMes[mes - 1];
         mes++;
@@ -57,13 +92,122 @@ void Paciente::calcularTempos(double tempoTriagem, double tempoAtendimento, doub
         }
     }
 
-    // Atualiza os atributos de saída
-    diaSaida = dia;
-    mesSaida = mes;
-    anoSaida = ano;
-    horaSaida = (horaAdmissao + horasSaida) % 24;
-    minutoSaida = minutosSaida;
+    // Calcula hora e minuto de saída
+    int hora = tempoAdmissao[4] + horasExtras;
+    int minuto = minutosExtras;
 
+    if (hora >= 24) {
+        hora -= 24;
+        dia++;
+        if (dia > diasPorMes[mes - 1]) {
+            dia -= diasPorMes[mes - 1];
+            mes++;
+            if (mes > 12) {
+                mes = 1;
+                ano++;
+            }
+        }
+    }
+
+    // Atualiza os atributos de saída
+    tempoSaida[0] = ano;
+    tempoSaida[1] = mes;
+    tempoSaida[2] = dia;
+    tempoSaida[3] = hora;
+    tempoSaida[4] = minuto;
+}
+
+int* Paciente::calcularProximoEvento(int tempoInicio[5], double tempoMedio) {
+
+    // Converte tempoMedio de horas para minutos
+    int minutosAdicionar = static_cast<int>(tempoMedio * 60);
+    int minutosExtras = minutosAdicionar % 60;
+    int totalHoras = minutosAdicionar / 60;
+    int horasExtras = totalHoras % 24;
+    int diasExtras = totalHoras / 24;
+
+    // Ajusta a data e hora de início
+    int minuto = tempoInicio[4] + minutosExtras;
+    int hora = tempoInicio[3] + horasExtras;
+    int dia = tempoInicio[2] + diasExtras;
+    int mes = tempoInicio[1];
+    int ano = tempoInicio[0];
+
+    // Ajusta minutos e horas
+    if (minuto >= 60) {
+        minuto -= 60;
+        hora++;
+    }
+    if (hora >= 24) {
+        hora -= 24;
+        dia++;
+    }
+
+    // Array com número de dias por mês
+    int diasPorMes[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+    // Ajusta para anos bissextos
+    if ((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0)) {
+        diasPorMes[1] = 29;
+    }
+
+    // Calcula a transição de dias, meses e anos
+    while (dia > diasPorMes[mes - 1]) {
+        dia -= diasPorMes[mes - 1];
+        mes++;
+        if (mes > 12) {
+            mes = 1;
+            ano++;
+            // Reajusta para anos bissextos
+            if ((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0)) {
+                diasPorMes[1] = 29;
+            } else {
+                diasPorMes[1] = 28;
+            }
+        }
+    }
+
+    // Atualiza o novo tempo
+    proximoTempo[0] = ano;
+    proximoTempo[1] = mes;
+    proximoTempo[2] = dia;
+    proximoTempo[3] = hora;
+    proximoTempo[4] = minuto;
+
+    tempoEspera += tempoDiff(tempoInicio, proximoTempo);
+
+    return proximoTempo;
+}
+
+// Avança o estado do paciente para o próximo
+void Paciente::avancarEstado() {
+    if (estadoAtual < 14) { // Máximo de estados definidos
+        estadoAtual++;
+    } else {
+        throw std::runtime_error("Estado inválido: não pode avançar além do último estado.");
+    }
+}
+
+
+//----------------#Funções secundárias#----------------
+
+
+// Define o estado atual do paciente
+void Paciente::setEstado(int estado) {
+    if (estado < 0 || estado > 14) {
+        throw std::invalid_argument("Estado inválido: deve estar entre 0 e 14.");
+    }
+    estadoAtual = estado;
+}
+
+// Retorna o estado atual do paciente
+int Paciente::getEstado() const {
+    return estadoAtual;
+}
+
+// Setter para tempo de espera  
+void Paciente::setTempoEspera(double tempo) {
+    tempoEspera = tempo;
 }
 
 // Retorna tempo total em espera
@@ -81,36 +225,45 @@ double Paciente::getTempoTotal() const {
     return tempoTotal;
 }
 
-// Função para obter o nome do dia da semana
-std::string getDiaSemana(int ano, int mes, int dia) {
-    static const char* diasSemana[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-    std::tm time_in = { 0, 0, 0, dia, mes - 1, ano - 1900 };
-    std::mktime(&time_in);
-    return diasSemana[time_in.tm_wday];
+std::string Paciente::getId() const {
+    return id;
 }
 
-// Função para obter o nome do mês
-std::string getMesNome(int mes) {
-    static const char* meses[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-    return meses[mes - 1];
+bool Paciente::getAlta() const {
+    return alta;
 }
 
-// Função para formatar a data e hora
-std::string formatarDataHora(int ano, int mes, int dia, int hora, int minuto) {
-    std::ostringstream oss;
-    oss << getDiaSemana(ano, mes, dia) << " " << getMesNome(mes) << " " << std::setw(2) << std::setfill('0') << dia
-        << " " << std::setw(2) << std::setfill('0') << hora << ":" << std::setw(2) << std::setfill('0') << minuto
-        << ":00 " << ano;
-    return oss.str();
+int Paciente::getGrauUrgencia() const {
+    return grauUrgencia;
 }
 
-// Função para escrever o output do paciente
+int Paciente::getMedidasHospitalares() const {
+    return medidasHospitalares;
+}
+
+int Paciente::getTestesLaboratorio() const {
+    return testesLaboratorio;
+}
+
+int Paciente::getExamesImagem() const {
+    return examesImagem;
+}
+
+int Paciente::getInstrumentosMedicamentos() const {
+    return instrumentosMedicamentos;
+}
+
+int* Paciente::getTempoAdmissao() const {
+    return tempoAdmissao;
+}
+
+// Função para escrever o output do paciente (usando funções simplificadas)
 void Paciente::escreverOutput() const {
     std::ostringstream oss;
-    oss << id << " " << formatarDataHora(anoAdmissao, mesAdmissao, diaAdmissao, horaAdmissao, 0) << " "
-        << formatarDataHora(anoSaida, mesSaida, diaSaida, horaSaida, minutoSaida) << " "
-        << std::fixed << std::setprecision(2) << tempoTotal << " " << tempoPermanencia << " " << tempoEspera;
+    oss << id << " " 
+        << formatarDataHora(tempoAdmissao) << " "
+        << formatarDataHora(tempoSaida) << " "
+        << std::fixed << std::setprecision(2) 
+        << tempoTotal << " " << tempoPermanencia << " " << tempoEspera;
     std::cout << oss.str() << std::endl;
 }
-
-
