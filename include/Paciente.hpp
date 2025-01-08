@@ -13,12 +13,12 @@ private:
     int medidasHospitalares, testesLaboratorio, examesImagem, instrumentosMedicamentos; // Quantidades de procedimentos
     
     // Estado
-    int estadoAtual; // 0 - 14;
+    std::string estadoAtual; 
     int* proximoTempo;
 
     // Estatística
     double tempoEspera; // Tempo total em espera
-    double tempoPermanencia; // Tempo total no hospital (triagem + atendimento + procedimentos)
+    double tempoAtendido; // Tempo total no hospital (triagem + atendimento + procedimentos)
     double tempoTotal; // Tempo total no hospital (permanência + espera)
 
     // Hora de saída
@@ -46,7 +46,7 @@ public:
 
     // Getters
     double getTempoEspera() const;
-    double getTempoPermanencia() const;
+    double getTempoAtendido() const;
     double getTempoTotal() const;
     std::string getId() const;
     bool getAlta() const;
@@ -56,7 +56,6 @@ public:
     int getTestesLaboratorio() const;
     int getExamesImagem() const;
     int getInstrumentosMedicamentos() const;
-
     
     // Função para escrever o output do paciente
     void escreverOutput() const;
@@ -64,27 +63,15 @@ public:
 
 #endif
 
-/* 
-
-Crie um .hpp e um .cpp de um tad de paciente, ele deve conter seu construtor da seguinte maneira:
-
-Paciente(const std::string& id, bool alta, int ano, int mes, int dia, int hora, int grau, int mh, int tl, int ei, int im);
-
-e seu private deve ser assim:
-
-    std::string id; // Identificador único do paciente
-    bool alta; // Indica se teve alta após o atendimento
-    int anoAdmissao, mesAdmissao, diaAdmissao, horaAdmissao; // Data e hora de admissão
-    int grauUrgencia; // Grau de urgência: 0 - Verde, 1 - Amarelo, 2 - Vermelho
-    int medidasHospitalares, testesLaboratorio, examesImagem, instrumentosMedicamentos; // Quantidades de procedimentos
-    
-    
-    // Estatística
-    double tempoEspera; // Tempo total em espera
-    double tempoPermanencia; // Tempo total no hospital (triagem + atendimento + procedimentos)
-    double tempoTotal; // Tempo total no hospital (permanência + espera)
-
-    // Hora de saída
-    int anoSaida, mesSaida, diaSaida, horaSaida, minutoSaida;
-
-outras funções necessárias: bool de calcular estatísticas, get de tempo de espera, get tempo de atendimento, get tempo total, escrever o output conforme o output almejado para um paciênte unico */
+/*
+Os estados aceitos são:
+fila_triagem
+em_triagem
+fim_triagem
+fila_atendimento
+em_atendimento
+fim_atendimento
+fila_procedimentos
+em_procedimentos
+alta
+*/

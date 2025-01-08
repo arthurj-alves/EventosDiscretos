@@ -1,52 +1,44 @@
-# Variáveis do Makefile
-CXX = g++
-CXXFLAGS = -Wall -std=c++11 -Iinclude
+# Configurações
+CXX := g++
+CXXFLAGS := -Wall -Wextra -Werror -std=c++11
+SRC_DIR := src
+INCLUDE_DIR := include
+BUILD_DIR := build
+BIN_DIR := bin
 
-# Diretórios
-SRC_DIR = src
-OBJ_DIR = obj
-BIN_DIR = bin
+# Obtém todos os arquivos .cpp em SRC_DIR
+SRCS := $(wildcard $(SRC_DIR)/*.cpp)
+
+# Obtém todos os arquivos .hpp em INCLUDE_DIR
+HEADERS := $(wildcard $(INCLUDE_DIR)/*.hpp)
+
+# Gera o nome dos arquivos de objeto para cada arquivo .cpp
+OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRCS))
 
 # Nome do executável
-EXECUTABLE = $(BIN_DIR)/main
+EXEC := $(BIN_DIR)/RinhaDePokemons
 
-# Fontes e objetos
-SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/Paciente.cpp $(SRC_DIR)/Fila.cpp $(SRC_DIR)/Procedimento.cpp $(SRC_DIR)/Escalonador.cpp
-OBJECTS = $(OBJ_DIR)/main.o $(OBJ_DIR)/Paciente.o $(OBJ_DIR)/Fila.o $(OBJ_DIR)/Procedimento.o $(OBJ_DIR)/Escalonador.o
+# Regra para compilar cada arquivo de objeto
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADERS)
+	$(CXX) $(CXXFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
-# Regra padrão para compilar o executável
-all: $(EXECUTABLE)
+# Regra de compilação final
+$(EXEC): $(OBJS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+	@echo "Executável gerado em $(EXEC)"
 
-# Regra para compilar o executável
-$(EXECUTABLE): $(OBJECTS)
-	@mkdir -p $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS)
-
-# Regras para compilar os arquivos objeto
-$(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp include/Paciente.hpp include/Fila.hpp include/Procedimento.hpp include/Escalonador.hpp
-	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/main.cpp -o $@
-
-$(OBJ_DIR)/Paciente.o: $(SRC_DIR)/Paciente.cpp include/Paciente.hpp
-	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/Paciente.cpp -o $@
-
-$(OBJ_DIR)/Fila.o: $(SRC_DIR)/Fila.cpp include/Fila.hpp include/Paciente.hpp
-	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/Fila.cpp -o $@
-
-$(OBJ_DIR)/Procedimento.o: $(SRC_DIR)/Procedimento.cpp include/Procedimento.hpp
-	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/Procedimento.cpp -o $@
-
-$(OBJ_DIR)/Escalonador.o: $(SRC_DIR)/Escalonador.cpp include/Escalonador.hpp include/Paciente.hpp include/Fila.hpp include/Procedimento.hpp
-	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/Escalonador.cpp -o $@
-
-# Limpeza dos arquivos objeto e executável
+# Regra para limpar arquivos compilados
 clean:
-	rm -rf $(OBJ_DIR)/*.o $(EXECUTABLE)
-	rm -rf $(BIN_DIR)
+	@rm -rf $(BUILD_DIR)/*.o
+	@echo "Arquivos de objeto limpos"
 
-# Phony targets para garantir que `clean` seja executado corretamente
-.PHONY: all clean
+# Cria os diretórios de build e bin caso não existam
+$(shell mkdir -p $(BUILD_DIR))
+$(shell mkdir -p $(BIN_DIR))
+
+# Define a regra 'all' como padrão
+all: $(EXEC)
+
+# Define a regra 'clean' para limpar arquivos compilados
+.PHONY: clean
+

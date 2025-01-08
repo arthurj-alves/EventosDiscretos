@@ -7,14 +7,21 @@
 Paciente::Paciente(const std::string& id, bool alta, int ano, int mes, int dia, int hora, 
                    int grau, int mh, int tl, int ei, int im) 
     : id(id), alta(alta), grauUrgencia(grau), medidasHospitalares(mh), testesLaboratorio(tl), 
-      examesImagem(ei), instrumentosMedicamentos(im), estadoAtual(0), tempoEspera(0), tempoPermanencia(0) {
+      examesImagem(ei), instrumentosMedicamentos(im), tempoEspera(0), tempoAtendido(0) {
+
+    if(alta=1){
+        medidasHospitalares = 0;
+        testesLaboratorio = 0;
+        examesImagem = 0;
+        instrumentosMedicamentos = 0;
+    }
 
     tempoAdmissao[0] = ano;
     tempoAdmissao[1] = mes;
     tempoAdmissao[2] = dia;
     tempoAdmissao[3] = hora;
 
-    estadoAtual = 2;
+    estadoAtual = "fila_triagem";
 
     // Validar grau de urgência
     if (grauUrgencia < 0 || grauUrgencia > 2) {
@@ -48,13 +55,12 @@ Paciente::Paciente(const std::string& id, bool alta, int ano, int mes, int dia, 
 void Paciente::calcularTempos(double tempoTriagem, double tempoAtendimento, double tempoMH,
                               double tempoTL, double tempoEI, double tempoIM) {
     // Calcula o tempo total de permanência
-    tempoPermanencia = tempoTriagem + tempoAtendimento + 
+    tempoAtendido = tempoTriagem + tempoAtendimento + 
                        (medidasHospitalares * tempoMH) + 
                        (testesLaboratorio * tempoTL) + 
                        (examesImagem * tempoEI) + 
                        (instrumentosMedicamentos * tempoIM);
 
-    tempoTotal = tempoPermanencia + tempoEspera;
 
     // Converte tempo total de horas para minutos
     int totalMinutos = static_cast<int>(tempoTotal * 60);
@@ -115,6 +121,11 @@ void Paciente::calcularTempos(double tempoTriagem, double tempoAtendimento, doub
     tempoSaida[2] = dia;
     tempoSaida[3] = hora;
     tempoSaida[4] = minuto;
+
+    tempoTotal = tempoDiff(tempoAdmissao, tempoSaida);
+
+    tempoEspera = tempoTotal - tempoAtendido;
+
 }
 
 int* Paciente::calcularProximoEvento(int tempoInicio[5], double tempoMedio) {
@@ -168,15 +179,13 @@ int* Paciente::calcularProximoEvento(int tempoInicio[5], double tempoMedio) {
     }
 
     // Atualiza o novo tempo
-    proximoTempo[0] = ano;
-    proximoTempo[1] = mes;
-    proximoTempo[2] = dia;
-    proximoTempo[3] = hora;
-    proximoTempo[4] = minuto;
+    tempoSaida[0] = ano;
+    tempoSaida[1] = mes;
+    tempoSaida[2] = dia;
+    tempoSaida[3] = hora;
+    tempoSaida[4] = minuto;
 
-    tempoEspera += tempoDiff(tempoInicio, proximoTempo);
-
-    return proximoTempo;
+    return tempoSaida;
 }
 
 // Avança o estado do paciente para o próximo
@@ -201,7 +210,7 @@ void Paciente::setEstado(int estado) {
 }
 
 // Retorna o estado atual do paciente
-int Paciente::getEstado() const {
+std::string Paciente::getEstado() const {
     return estadoAtual;
 }
 
@@ -216,8 +225,8 @@ double Paciente::getTempoEspera() const {
 }
 
 // Retorna tempo total no hospital (permanência)
-double Paciente::getTempoPermanencia() const {
-    return tempoPermanencia;
+double Paciente::getTempoAtendido() const {
+    return tempoAtendido;
 }
 
 // Retorna tempo total no hospital (permanência + espera)
@@ -264,6 +273,6 @@ void Paciente::escreverOutput() const {
         << formatarDataHora(tempoAdmissao) << " "
         << formatarDataHora(tempoSaida) << " "
         << std::fixed << std::setprecision(2) 
-        << tempoTotal << " " << tempoPermanencia << " " << tempoEspera;
+        << tempoTotal << " " << tempoAtendido << " " << tempoEspera;
     std::cout << oss.str() << std::endl;
 }

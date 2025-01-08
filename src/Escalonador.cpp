@@ -7,20 +7,37 @@
 // Construtor
 Escalonador::Escalonador() : tamanho(0) {}
 
-// Insere um evento no min-heap
-void Escalonador::inserePaciente(Paciente* paciente[], int qntPacientes) {
-    if (tamanho >= MAX_EVENTOS) {
-        throw std::overflow_error("Heap de eventos cheio.");
+// Insere pacientes no escalonador
+void::Escalonador::fazTriagem(Paciente* paciente[], int qntPacientes) {
+
+    // Inserir pacientes na fila de triagem
+    for (int i = 0; i < qntPacientes; i++) {
+        eventos[tamanho].paciente = paciente[i];
+        eventos[tamanho].tempoInicio = paciente[i]->getTempoAdmissao();
+        
+        procedimentos[0].alocarTriagem(paciente[i]);
+        
+        heapifyParaCima(tamanho);
+        tamanho++;
     }
 
-    for(int i = 0; i < qntPacientes; i++) {
-        eventos[i].paciente = paciente[i];
-        eventos[i].tempoInicio = paciente[i]->getTempoAdmissao();
-    }
 
-    // Ajusta a posição do novo evento no heap
-    heapifyParaCima(tamanho);
-    tamanho++;
+    // Processar pacientes na fila de triagem
+    while (!procedimentos[0].procedimentoVazio())
+    {
+        Evento evento = eventos[0];
+        Paciente* paciente = evento.paciente;
+
+        // Calcular o tempo de saída da triagem
+        int* tempoInicio = evento.tempoInicio;
+        double tempoTriagem = procedimentos[0].getTempoMedio();
+        int* tempoSaida = paciente->calcularProximoEvento(tempoInicio, tempoTriagem);
+
+        procedimentos[1].alocarAtendimento(paciente);
+
+        evento.tempoInicio = tempoSaida;
+        heapifyParaBaixo(0);
+    }   
 }
 
 void Escalonador::inicializaProcedimentos(Procedimento* procedimentos[]) {
@@ -28,12 +45,10 @@ void Escalonador::inicializaProcedimentos(Procedimento* procedimentos[]) {
         this->procedimentos[i] = *procedimentos[i];
     }
 }
+        
 
 // Remove o próximo evento (menor tempo) do heap
 Evento Escalonador::retiraProximoEvento() {
-    if (vazio()) {
-        throw std::underflow_error("Nao ha eventos para remover.");
-    }
 
     Evento proximo = eventos[0];
     Paciente* paciente = proximo.paciente;
@@ -42,8 +57,7 @@ Evento Escalonador::retiraProximoEvento() {
     paciente->avancarEstado();
 
     // Verifica o próximo estado do paciente
-    int estadoAtual = paciente->getEstado();
-    if (estadoAtual == 14 || (paciente->getAlta() && estadoAtual == 5)) {
+    if (paciente->getEstado() == 14 || (paciente->getAlta() && paciente->getEstado() == 5)) {
         // Paciente recebe alta
         std::cout << "Paciente " << paciente->getId() << " recebeu alta." << std::endl;
         paciente->calcularTempos(procedimentos[0].getTempoMedio(), procedimentos[1].getTempoMedio(),
@@ -52,7 +66,7 @@ Evento Escalonador::retiraProximoEvento() {
         // Remove o paciente do escalonador
         eventos[0] = eventos[tamanho - 1];
         tamanho--;
-        heapifyParaBaixo(0);
+        
     } else {
         // Atualiza o tempo de início do próximo evento
         eventos[0].tempoInicio = paciente->calcularProximoEvento(eventos[0].tempoInicio, procedimentos[estadoAtual - 1].getTempoMedio());

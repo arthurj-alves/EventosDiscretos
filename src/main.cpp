@@ -5,8 +5,6 @@
 #include <iostream>
 
 int main() {
-    // Inicializa Condição de Término para FALSO
-    bool condicaoTermino = false;
 
     // Inicializa as variáveis de estado do sistema
     Escalonador escalonador;
@@ -26,7 +24,7 @@ int main() {
     Paciente paciente1("0009600008", false, 2017, 3, 21, 2, 1, 5, 43, 2, 110);
     Paciente paciente2("0009600009", false, 2017, 3, 21, 2, 0, 3, 1, 5, 21);
     Paciente* pacientes[] = { &paciente1, &paciente2 };
-    escalonador.inserePaciente(pacientes, 2);
+    escalonador.fazTriagem(pacientes, 2);
 
     // Enquanto houver eventos ou filas não vazias
     while (!escalonador.vazio()) {

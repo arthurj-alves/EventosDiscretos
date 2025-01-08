@@ -15,10 +15,8 @@ struct Evento {
 
 class Escalonador {
 private:
-    Evento eventos_grau0[MAX_EVENTOS];  // Min-Heap para grau Verde
-    Evento eventos_grau1[MAX_EVENTOS];  // Min-Heap para grau Amarelo
-    Evento eventos_grau2[MAX_EVENTOS];  // Min-Heap para grau Vermelho
-    int tamanho;  // Núamero de eventos no heap
+    Evento eventos[MAX_EVENTOS];  // Min-Heap para todos os eventos
+    int tamanho;
     Procedimento procedimentos[6];
 
     // Funções auxiliares para manipulação do heap
@@ -30,7 +28,7 @@ public:
 
     // Funções principais
     void inicializaProcedimentos(Procedimento* procedimentos[]);
-    void inserePaciente(Paciente* paciente[], int qntPacientes);
+    void fazTriagem(Paciente* paciente[], int qntPacientes);
     Evento retiraProximoEvento();
     bool vazio() const;
 

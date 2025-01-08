@@ -21,9 +21,11 @@ public:
     Procedimento(double tempoMedio, int numUnidades);
 
     // Métodos principais
-    void alocarUnidade(Paciente* paciente);    // Tenta alocar uma unidade, retorna true se sucesso
+    void alocarTriagem(Paciente* paciente);
+    void alocarAtendimento(Paciente* paciente);
     void desalocarUnidade(); // Libera uma unidade
     bool temUnidadesLivres() const; // Verifica se há unidades livres
+    bool procedimentoVazio(); // Verifica se o procedimento está vazio
 
     // Getters
     double getTempoMedio() const;
