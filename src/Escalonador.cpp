@@ -7,74 +7,97 @@
 // Construtor
 Escalonador::Escalonador() : tamanho(0) {}
 
-// Insere pacientes no escalonador
-void::Escalonador::fazTriagem(Paciente* paciente[], int qntPacientes) {
+void Escalonador::reordenaEvento(int index, Evento evento) {
+    // Remover o evento do heap
+    eventos[index] = eventos[tamanho - 1];
+    tamanho--;
+    heapifyParaBaixo(index);
+    
+    // Reinsira o evento atualizado no heap
+    eventos[tamanho] = evento;
+    heapifyParaCima(tamanho);
+    tamanho++;
+}
+
+void Escalonador::inicializaEscalonador(Procedimento* procedimento[], Paciente* paciente[], int qntPacientes) {
 
     // Inserir pacientes na fila de triagem
     for (int i = 0; i < qntPacientes; i++) {
         eventos[tamanho].paciente = paciente[i];
         eventos[tamanho].tempoInicio = paciente[i]->getTempoAdmissao();
         
-        procedimentos[0].alocarTriagem(paciente[i]);
+        procedimento[0]->enfileirarTriagem(paciente[i]);
         
         heapifyParaCima(tamanho);
         tamanho++;
     }
+}
 
+// Processa a triagem de todos os pacientes
+void Escalonador::fazTriagem(Procedimento* procedimento, int qntPacientes) {
 
     // Processar pacientes na fila de triagem
-    while (!procedimentos[0].procedimentoVazio())
-    {
-        Evento evento = eventos[0];
-        Paciente* paciente = evento.paciente;
+    while (!procedimento->grauVerde.filaVazia()) { // Triagem utiliza apenas a fila verde
+        int i = 0;
+        while(procedimento->temUnidadesLivres() && i < tamanho) {
+            Evento evento = eventos[i];
+            Paciente* paciente = evento.paciente;
 
-        // Calcular o tempo de saída da triagem
-        int* tempoInicio = evento.tempoInicio;
-        double tempoTriagem = procedimentos[0].getTempoMedio();
-        int* tempoSaida = paciente->calcularProximoEvento(tempoInicio, tempoTriagem);
-
-        procedimentos[1].alocarAtendimento(paciente);
-
-        evento.tempoInicio = tempoSaida;
-        heapifyParaBaixo(0);
-    }   
+            procedimento->alocarTriagem(paciente);
+            evento.tempoInicio = paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
+            
+            reordenaEvento(i, evento);
+            
+            i++;
+        }
+        procedimento->desalocarTriagem();
+    }  
 }
 
-void Escalonador::inicializaProcedimentos(Procedimento* procedimentos[]) {
-    for (int i = 0; i < 6; ++i) {
-        this->procedimentos[i] = *procedimentos[i];
+void Escalonador::fazAtendimento(Procedimento* procedimento) {
+    Evento evento = eventos[0];
+    if(procedimento->temUnidadesLivres()){
+        switch (evento.paciente->getGrauUrgencia())
+        {
+        case 2:
+            if(procedimento->grauVermelho.filaVazia()){
+                procedimento->alocarAtendimento(evento.paciente);
+                evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
+            }else{
+                procedimento->enfileirarAtendimento(evento.paciente);
+                procedimento->alocarAtendimento(procedimento->grauVermelho.desenfileira());
+            }
+            break;
+        case 1:
+            if(procedimento->grauAmarelo.filaVazia()){
+                procedimento->alocarAtendimento(evento.paciente);
+            }else{ 
+                procedimento->enfileirarAtendimento(evento.paciente);
+                procedimento->alocarAtendimento(procedimento->grauAmarelo.desenfileira());
+            }
+            break;
+        case 0:
+            if(procedimento->grauVerde.filaVazia()){
+                procedimento->alocarAtendimento(evento.paciente);
+            }else{
+                procedimento->enfileirarAtendimento(evento.paciente);
+                procedimento->alocarAtendimento(procedimento->grauVerde.desenfileira());
+            }
+            break;
+        default:
+            break;
+        }
+    }else{
+        procedimento->enfileirarAtendimento(evento.paciente);
     }
 }
-        
+
 
 // Remove o próximo evento (menor tempo) do heap
-Evento Escalonador::retiraProximoEvento() {
+Evento Escalonador::retiraProximoEvento(Procedimento procedimentos[], int estadoAtual) {
 
-    Evento proximo = eventos[0];
-    Paciente* paciente = proximo.paciente;
-
-    // Avança o estado do paciente
-    paciente->avancarEstado();
-
-    // Verifica o próximo estado do paciente
-    if (paciente->getEstado() == 14 || (paciente->getAlta() && paciente->getEstado() == 5)) {
-        // Paciente recebe alta
-        std::cout << "Paciente " << paciente->getId() << " recebeu alta." << std::endl;
-        paciente->calcularTempos(procedimentos[0].getTempoMedio(), procedimentos[1].getTempoMedio(),
-                                 procedimentos[2].getTempoMedio(), procedimentos[3].getTempoMedio(),
-                                 procedimentos[4].getTempoMedio(), procedimentos[5].getTempoMedio());
-        // Remove o paciente do escalonador
-        eventos[0] = eventos[tamanho - 1];
-        tamanho--;
-        
-    } else {
-        // Atualiza o tempo de início do próximo evento
-        eventos[0].tempoInicio = paciente->calcularProximoEvento(eventos[0].tempoInicio, procedimentos[estadoAtual - 1].getTempoMedio());
-        heapifyParaBaixo(0);
-    }
-    
-    return proximo;
 }
+
 
 // Verifica se o escalonador está vazio
 bool Escalonador::vazio() const {

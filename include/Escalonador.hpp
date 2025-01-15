@@ -17,7 +17,6 @@ class Escalonador {
 private:
     Evento eventos[MAX_EVENTOS];  // Min-Heap para todos os eventos
     int tamanho;
-    Procedimento procedimentos[6];
 
     // Funções auxiliares para manipulação do heap
     void heapifyParaCima(int index);
@@ -25,11 +24,16 @@ private:
 
 public:
     Escalonador();
+    void reordenaEvento(int index, Evento evento);
 
     // Funções principais
-    void inicializaProcedimentos(Procedimento* procedimentos[]);
-    void fazTriagem(Paciente* paciente[], int qntPacientes);
-    Evento retiraProximoEvento();
+    void inicializaEscalonador(Procedimento* procedimentos[], Paciente* paciente[], int qntPacientes);
+    
+    void fazTriagem(Procedimento* procedimento, int qntPacientes);
+    void fazAtendimento(Procedimento* procedimentos);
+
+    Evento retiraProximoEvento(Procedimento procedimentos[], int estadoAtual);
+    void processaFilas();
     bool vazio() const;
 
     // Estatísticas

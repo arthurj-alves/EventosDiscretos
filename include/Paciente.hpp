@@ -40,8 +40,8 @@ public:
 
     // Estado 
     void avancarEstado();        // Avança para o próximo estado
-    void setEstado(int estado);  // Define diretamente um estado
-    int getEstado() const;       // Retorna o estado atual
+    void setEstado(std::string estado);  // Define diretamente um estado
+    std::string getEstado() const;       // Retorna o estado atual
     
 
     // Getters

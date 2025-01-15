@@ -190,10 +190,20 @@ int* Paciente::calcularProximoEvento(int tempoInicio[5], double tempoMedio) {
 
 // Avança o estado do paciente para o próximo
 void Paciente::avancarEstado() {
-    if (estadoAtual < 14) { // Máximo de estados definidos
-        estadoAtual++;
+    if (estadoAtual == "fila_triagem") {
+        estadoAtual = "em_triagem";
+    } else if (estadoAtual == "em_triagem") {
+        estadoAtual = "fila_atendimento";
+    } else if (estadoAtual == "fila_atendimento") {
+        estadoAtual = "em_atendimento";
+    } else if (estadoAtual == "em_atendimento") {
+        estadoAtual = "fila_procedimentos";
+    } else if (estadoAtual == "fila_procedimentos") {
+        estadoAtual = "em_procedimentos";
+    } else if (estadoAtual == "em_procedimentos") {
+        estadoAtual = "alta";
     } else {
-        throw std::runtime_error("Estado inválido: não pode avançar além do último estado.");
+        throw std::invalid_argument("Estado atual inválido.");
     }
 }
 
@@ -202,10 +212,7 @@ void Paciente::avancarEstado() {
 
 
 // Define o estado atual do paciente
-void Paciente::setEstado(int estado) {
-    if (estado < 0 || estado > 14) {
-        throw std::invalid_argument("Estado inválido: deve estar entre 0 e 14.");
-    }
+void Paciente::setEstado(std::string estado) {
     estadoAtual = estado;
 }
 

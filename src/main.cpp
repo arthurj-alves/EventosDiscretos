@@ -15,7 +15,6 @@ int main() {
     Procedimento imagem(0.5, 20);
     Procedimento instrumentos(0.05, 5);
     Procedimento* procedimentos[] = { &triagem, &atendimento, &medidas, &testes, &imagem, &instrumentos };
-    escalonador.inicializaProcedimentos(procedimentos);
 
     // Inicializa o Relógio
     double relogioAtual = 0.0;
@@ -24,7 +23,10 @@ int main() {
     Paciente paciente1("0009600008", false, 2017, 3, 21, 2, 1, 5, 43, 2, 110);
     Paciente paciente2("0009600009", false, 2017, 3, 21, 2, 0, 3, 1, 5, 21);
     Paciente* pacientes[] = { &paciente1, &paciente2 };
-    escalonador.fazTriagem(pacientes, 2);
+    escalonador.inicializaEscalonador(procedimentos, pacientes, 2);
+    
+    // Processa a triagem de todos os pacientes
+    escalonador.fazTriagem();
 
     // Enquanto houver eventos ou filas não vazias
     while (!escalonador.vazio()) {
