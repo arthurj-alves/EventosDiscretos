@@ -50,32 +50,26 @@ void Procedimento::enfileirarAtendimento(Paciente* paciente){
         break; 
     case 2:
         grauVermelho.enfileira(paciente);
-        break;
+        break;    Paciente* paciente;
+
+    if(!grauVerde.filaVazia()){
+        if(temUnidadesLivres()){
+            unidadesLivres--;
+            paciente = grauVerde.desenfileira();
+            paciente->setEstado("em_triagem");
+        }
+    }else{
+        throw std::runtime_error("Fila de triagem vazia.");
+    }
     default:
         break;
     }
 }
 // Alocar uma unidade para um paciente
 void Procedimento::alocarAtendimento(Paciente* paciente) {
-
-    if(unidadesLivres == 0){
-        switch (paciente->getGrauUrgencia())
-        {
-        case 0:
-            grauVerde.enfileira(paciente);
-            break;
-        case 1:
-            grauAmarelo.enfileira(paciente);
-            break; 
-        case 2:
-            grauVermelho.enfileira(paciente);
-            break;
-        default:
-            break;
-        }
-    }else{
-        unidadesLivres--;
-    }
+    unidadesLivres--;
+    paciente = grauVerde.desenfileira();
+    paciente->setEstado("em_triagem");
 }
 
 

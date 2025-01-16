@@ -31,8 +31,13 @@ public:
     
     void fazTriagem(Procedimento* procedimento, int qntPacientes);
     void fazAtendimento(Procedimento* procedimentos);
+    void fazMedidas(Procedimento* procedimentos);
+    void fazTestes(Procedimento* procedimentos);
+    void fazExames(Procedimento* procedimentos);
+    void fazInstrumentos(Procedimento* procedimentos);
 
-    Evento retiraProximoEvento(Procedimento procedimentos[], int estadoAtual);
+
+
     void processaFilas();
     bool vazio() const;
 

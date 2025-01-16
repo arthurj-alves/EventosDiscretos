@@ -56,6 +56,8 @@ void Escalonador::fazTriagem(Procedimento* procedimento, int qntPacientes) {
 
 void Escalonador::fazAtendimento(Procedimento* procedimento) {
     Evento evento = eventos[0];
+
+// fazer sistema de dar alta;
     if(procedimento->temUnidadesLivres()){
         switch (evento.paciente->getGrauUrgencia())
         {
@@ -63,25 +65,28 @@ void Escalonador::fazAtendimento(Procedimento* procedimento) {
             if(procedimento->grauVermelho.filaVazia()){
                 procedimento->alocarAtendimento(evento.paciente);
                 evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
+                reordenaEvento(0, evento);
             }else{
                 procedimento->enfileirarAtendimento(evento.paciente);
-                procedimento->alocarAtendimento(procedimento->grauVermelho.desenfileira());
+                // procedimento->alocarAtendimento(procedimento->grauVermelho.desenfileira());
             }
             break;
         case 1:
             if(procedimento->grauAmarelo.filaVazia()){
                 procedimento->alocarAtendimento(evento.paciente);
+                evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
             }else{ 
                 procedimento->enfileirarAtendimento(evento.paciente);
-                procedimento->alocarAtendimento(procedimento->grauAmarelo.desenfileira());
+                // procedimento->alocarAtendimento(procedimento->grauAmarelo.desenfileira());
             }
             break;
         case 0:
             if(procedimento->grauVerde.filaVazia()){
                 procedimento->alocarAtendimento(evento.paciente);
+                evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
             }else{
                 procedimento->enfileirarAtendimento(evento.paciente);
-                procedimento->alocarAtendimento(procedimento->grauVerde.desenfileira());
+                // procedimento->alocarAtendimento(procedimento->grauVerde.desenfileira());
             }
             break;
         default:
@@ -92,9 +97,54 @@ void Escalonador::fazAtendimento(Procedimento* procedimento) {
     }
 }
 
+void Escalonador::fazMedidas(Procedimento* procedimento) {
+    Evento evento = eventos[0];
+    
+    int iterator = evento.paciente->getMedidasHospitalares();
 
-// Remove o próximo evento (menor tempo) do heap
-Evento Escalonador::retiraProximoEvento(Procedimento procedimentos[], int estadoAtual) {
+    if(iterator = 0){
+
+        
+
+
+    }else{
+        for(int i = 0; i < iterator; i++){
+            if(procedimento->temUnidadesLivres()){
+                switch (evento.paciente->getGrauUrgencia())
+                {
+                case 2:
+                    if(procedimento->grauVermelho.filaVazia()){
+                        procedimento->alocarAtendimento(evento.paciente);
+                        evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
+                    }else{
+                        procedimento->enfileirarAtendimento(evento.paciente);
+                    }
+                    break;
+                case 1:
+                    if(procedimento->grauAmarelo.filaVazia()){
+                        procedimento->alocarAtendimento(evento.paciente);
+                        evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
+                    }else{ 
+                        procedimento->enfileirarAtendimento(evento.paciente);
+                    }
+                    break;
+                case 0:
+                    if(procedimento->grauVerde.filaVazia()){
+                        procedimento->alocarAtendimento(evento.paciente);
+                        evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
+                    }else{
+                        procedimento->enfileirarAtendimento(evento.paciente);
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }else{
+                procedimento->enfileirarAtendimento(evento.paciente);
+            }
+        }
+    }
+
 
 }
 
