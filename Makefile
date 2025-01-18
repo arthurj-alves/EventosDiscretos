@@ -1,44 +1,24 @@
-# Configurações
-CXX := g++
-CXXFLAGS := -Wall -Wextra -Werror -std=c++11
-SRC_DIR := src
-INCLUDE_DIR := include
-BUILD_DIR := build
-BIN_DIR := bin
+SRC_DIR = src
+INCLUDE_DIR = include
+OBJ_DIR = obj
+BIN_DIR = bin
 
-# Obtém todos os arquivos .cpp em SRC_DIR
-SRCS := $(wildcard $(SRC_DIR)/*.cpp)
+CXX = g++
+CXXFLAGS = -Wall -Wextra -std=c++17 -I$(INCLUDE_DIR)
 
-# Obtém todos os arquivos .hpp em INCLUDE_DIR
-HEADERS := $(wildcard $(INCLUDE_DIR)/*.hpp)
+SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
+EXEC = $(BIN_DIR)/tp2.out
 
-# Gera o nome dos arquivos de objeto para cada arquivo .cpp
-OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRCS))
-
-# Nome do executável
-EXEC := $(BIN_DIR)/RinhaDePokemons
-
-# Regra para compilar cada arquivo de objeto
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADERS)
-	$(CXX) $(CXXFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
-
-# Regra de compilação final
-$(EXEC): $(OBJS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
-	@echo "Executável gerado em $(EXEC)"
-
-# Regra para limpar arquivos compilados
-clean:
-	@rm -rf $(BUILD_DIR)/*.o
-	@echo "Arquivos de objeto limpos"
-
-# Cria os diretórios de build e bin caso não existam
-$(shell mkdir -p $(BUILD_DIR))
-$(shell mkdir -p $(BIN_DIR))
-
-# Define a regra 'all' como padrão
 all: $(EXEC)
 
-# Define a regra 'clean' para limpar arquivos compilados
-.PHONY: clean
+$(EXEC): $(OBJS)
+	@mkdir -p $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+clean:
+	rm -rf $(OBJ_DIR) $(BIN_DIR)

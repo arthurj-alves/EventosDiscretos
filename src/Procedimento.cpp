@@ -13,33 +13,21 @@ Procedimento::Procedimento(double tempoMedio, int numUnidades)
     }
 }
 
+//----------------------------#TRIAGEM#----------------------------
+
 void Procedimento::enfileirarTriagem(Paciente* paciente){
     grauVerde.enfileira(paciente);
 }
 
 
-void Procedimento::alocarTriagem(Paciente* paciente){
-    
-    Paciente* paciente;
-
-    if(!grauVerde.filaVazia()){
-        if(temUnidadesLivres()){
-            unidadesLivres--;
-            paciente = grauVerde.desenfileira();
-            paciente->setEstado("em_triagem");
-        }
-    }else{
-        throw std::runtime_error("Fila de triagem vazia.");
-    }
-
+Paciente* Procedimento::retornaProximoTriagem(){
+    return grauVerde.desenfileira();
 }
 
-// Desalocar uma unidade triagem
-void Procedimento::desalocarTriagem() {
-    unidadesLivres = numUnidades;
-}
 
-void Procedimento::enfileirarAtendimento(Paciente* paciente){
+//----------------------------#PROCEDIMENTOS#----------------------------
+
+void Procedimento::enfileirarProcedimento(Paciente* paciente){
     switch (paciente->getGrauUrgencia())
     {
     case 0:
@@ -50,50 +38,40 @@ void Procedimento::enfileirarAtendimento(Paciente* paciente){
         break; 
     case 2:
         grauVermelho.enfileira(paciente);
-        break;    Paciente* paciente;
+        break;
 
-    if(!grauVerde.filaVazia()){
-        if(temUnidadesLivres()){
-            unidadesLivres--;
-            paciente = grauVerde.desenfileira();
-            paciente->setEstado("em_triagem");
-        }
-    }else{
-        throw std::runtime_error("Fila de triagem vazia.");
-    }
     default:
         break;
     }
 }
+
 // Alocar uma unidade para um paciente
-void Procedimento::alocarAtendimento(Paciente* paciente) {
+void Procedimento::alocarProcedimento() {
     unidadesLivres--;
-    paciente = grauVerde.desenfileira();
-    paciente->setEstado("em_triagem");
 }
 
-
-// Desalocar uma unidade de atendimento
-Paciente* Procedimento::desalocarAtendimento() {
-    if (unidadesLivres >= numUnidades) {
-        throw std::runtime_error("Todas as unidades ja estao livres.");
-    }
-
+void Procedimento::desalocarProcedimento() {
     unidadesLivres++;
-    if(!grauVermelho.filaVazia()){
+}
+
+Paciente* Procedimento::retornaProximoProcedimento(int grau){
+    if(grau == 2){
         return grauVermelho.desenfileira();
-    }else if(!grauAmarelo.filaVazia()){
+    }else if(grau == 1){
         return grauAmarelo.desenfileira();
     }else{
         return grauVerde.desenfileira();
     }
 }
 
+
+//----------------------------#SECUNDÁRIAS#----------------------------
+
 // Verifica se há unidades livres
 bool Procedimento::temUnidadesLivres() const {
     if(unidadesLivres == 0){
         return false;
-    }else if(unidadesLivres > 0 && unidadesLivres <= numUnidades){
+    }else{
         return true;
     }
 }   
@@ -105,4 +83,8 @@ bool Procedimento::procedimentoVazio(){
 // Getter para o tempo médio
 double Procedimento::getTempoMedio() const {
     return tempoMedio;
+}
+
+int Procedimento::getUnidadesLivres() const {
+    return unidadesLivres;
 }

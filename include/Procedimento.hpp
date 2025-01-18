@@ -22,19 +22,19 @@ public:
 
     // Métodos principais
     void enfileirarTriagem(Paciente* paciente);
-    void alocarTriagem(Paciente* paciente);
-    void desalocarTriagem(); // Libera uma unidade de triagem
+    Paciente* retornaProximoTriagem(); 
     
-    void enfileirarAtendimento(Paciente* paciente);
-    void alocarAtendimento(Paciente* paciente);
-    // void desalocarAtendimento(); // Libera uma unidade de atendimento
-    Paciente* desalocarAtendimento(); // Libera uma unidade de atendimento
+    void enfileirarProcedimento(Paciente* paciente);
+    void alocarProcedimento();
+    void desalocarProcedimento(); 
+    Paciente* retornaProximoProcedimento(int grau);
     
     bool temUnidadesLivres() const; // Verifica se há unidades livres
     bool procedimentoVazio(); // Verifica se o procedimento está vazio
 
     // Getters
     double getTempoMedio() const;
+    int getUnidadesLivres() const;
 };
 
 #endif // PROCEDIMENTO_HPP

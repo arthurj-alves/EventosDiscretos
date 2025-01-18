@@ -5,162 +5,45 @@
 #include <cstring>
 
 // Construtor
-Escalonador::Escalonador() : tamanho(0) {}
+Escalonador::Escalonador(int tamanhoFixo) : tamanhoFixo(tamanhoFixo), tamanhoAtual(0) {
+    eventos = new Evento*[tamanhoFixo];
+}
 
-void Escalonador::reordenaEvento(int index, Evento evento) {
-    // Remover o evento do heap
-    eventos[index] = eventos[tamanho - 1];
-    tamanho--;
-    heapifyParaBaixo(index);
+
+
+void Escalonador::insereEscalonador(Paciente* paciente, int tipo) {
+
+    eventos[tamanhoAtual] = new Evento(paciente->getTempoTotal(), paciente, tipo);
+
+    heapifyParaCima(tamanhoAtual);
+    tamanhoAtual++;
+}
+
+Evento* Escalonador::retiraEvento() {
+    if (tamanhoAtual == 0) {
+        throw std::out_of_range("Escalonador vazio.");
+    }
+
+    Evento* evento = eventos[0];
+    eventos[0] = eventos[tamanhoAtual - 1];
+    tamanhoAtual--;
+    heapifyParaBaixo(0);
     
-    // Reinsira o evento atualizado no heap
-    eventos[tamanho] = evento;
-    heapifyParaCima(tamanho);
-    tamanho++;
+    return evento;
 }
-
-void Escalonador::inicializaEscalonador(Procedimento* procedimento[], Paciente* paciente[], int qntPacientes) {
-
-    // Inserir pacientes na fila de triagem
-    for (int i = 0; i < qntPacientes; i++) {
-        eventos[tamanho].paciente = paciente[i];
-        eventos[tamanho].tempoInicio = paciente[i]->getTempoAdmissao();
-        
-        procedimento[0]->enfileirarTriagem(paciente[i]);
-        
-        heapifyParaCima(tamanho);
-        tamanho++;
-    }
-}
-
-// Processa a triagem de todos os pacientes
-void Escalonador::fazTriagem(Procedimento* procedimento, int qntPacientes) {
-
-    // Processar pacientes na fila de triagem
-    while (!procedimento->grauVerde.filaVazia()) { // Triagem utiliza apenas a fila verde
-        int i = 0;
-        while(procedimento->temUnidadesLivres() && i < tamanho) {
-            Evento evento = eventos[i];
-            Paciente* paciente = evento.paciente;
-
-            procedimento->alocarTriagem(paciente);
-            evento.tempoInicio = paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
-            
-            reordenaEvento(i, evento);
-            
-            i++;
-        }
-        procedimento->desalocarTriagem();
-    }  
-}
-
-void Escalonador::fazAtendimento(Procedimento* procedimento) {
-    Evento evento = eventos[0];
-
-// fazer sistema de dar alta;
-    if(procedimento->temUnidadesLivres()){
-        switch (evento.paciente->getGrauUrgencia())
-        {
-        case 2:
-            if(procedimento->grauVermelho.filaVazia()){
-                procedimento->alocarAtendimento(evento.paciente);
-                evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
-                reordenaEvento(0, evento);
-            }else{
-                procedimento->enfileirarAtendimento(evento.paciente);
-                // procedimento->alocarAtendimento(procedimento->grauVermelho.desenfileira());
-            }
-            break;
-        case 1:
-            if(procedimento->grauAmarelo.filaVazia()){
-                procedimento->alocarAtendimento(evento.paciente);
-                evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
-            }else{ 
-                procedimento->enfileirarAtendimento(evento.paciente);
-                // procedimento->alocarAtendimento(procedimento->grauAmarelo.desenfileira());
-            }
-            break;
-        case 0:
-            if(procedimento->grauVerde.filaVazia()){
-                procedimento->alocarAtendimento(evento.paciente);
-                evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
-            }else{
-                procedimento->enfileirarAtendimento(evento.paciente);
-                // procedimento->alocarAtendimento(procedimento->grauVerde.desenfileira());
-            }
-            break;
-        default:
-            break;
-        }
-    }else{
-        procedimento->enfileirarAtendimento(evento.paciente);
-    }
-}
-
-void Escalonador::fazMedidas(Procedimento* procedimento) {
-    Evento evento = eventos[0];
-    
-    int iterator = evento.paciente->getMedidasHospitalares();
-
-    if(iterator = 0){
-
-        
-
-
-    }else{
-        for(int i = 0; i < iterator; i++){
-            if(procedimento->temUnidadesLivres()){
-                switch (evento.paciente->getGrauUrgencia())
-                {
-                case 2:
-                    if(procedimento->grauVermelho.filaVazia()){
-                        procedimento->alocarAtendimento(evento.paciente);
-                        evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
-                    }else{
-                        procedimento->enfileirarAtendimento(evento.paciente);
-                    }
-                    break;
-                case 1:
-                    if(procedimento->grauAmarelo.filaVazia()){
-                        procedimento->alocarAtendimento(evento.paciente);
-                        evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
-                    }else{ 
-                        procedimento->enfileirarAtendimento(evento.paciente);
-                    }
-                    break;
-                case 0:
-                    if(procedimento->grauVerde.filaVazia()){
-                        procedimento->alocarAtendimento(evento.paciente);
-                        evento.tempoInicio = evento.paciente->calcularProximoEvento(evento.tempoInicio, procedimento->getTempoMedio());
-                    }else{
-                        procedimento->enfileirarAtendimento(evento.paciente);
-                    }
-                    break;
-                default:
-                    break;
-                }
-            }else{
-                procedimento->enfileirarAtendimento(evento.paciente);
-            }
-        }
-    }
-
-
-}
-
 
 // Verifica se o escalonador está vazio
 bool Escalonador::vazio() const {
-    return tamanho == 0;
+    return tamanhoAtual == 0;
 }
 
-// Gera relatórios
-void Escalonador::geraRelatorios() {
-    std::cout << "Relatorio de Eventos:\n";
-    for (int i = 0; i < tamanho; ++i) {
-        eventos[i].paciente->escreverOutput();
+bool  desempata(Evento* evento1, Evento* evento2){
+    if(evento1->tempoInicio == evento2->tempoInicio){
+        return evento1->paciente->getId() < evento2->paciente->getId();
     }
+    return evento1->tempoInicio < evento2->tempoInicio;
 }
+
 
 // Ajusta o heap para cima
 void Escalonador::heapifyParaCima(int index) {
@@ -168,17 +51,7 @@ void Escalonador::heapifyParaCima(int index) {
         int pai = (index - 1) / 2;
 
         // Compara os tempos e ajusta se necessário
-        bool troca = false;
-        for (int i = 0; i < 5; ++i) {
-            if (eventos[index].tempoInicio[i] < eventos[pai].tempoInicio[i]) {
-                troca = true;
-                break;
-            } else if (eventos[index].tempoInicio[i] > eventos[pai].tempoInicio[i]) {
-                break;
-            }
-        }
-
-        if (troca) {
+        if (desempata(eventos[index], eventos[pai])) {
             std::swap(eventos[index], eventos[pai]);
             index = pai;
         } else {
@@ -193,34 +66,12 @@ void Escalonador::heapifyParaBaixo(int index) {
     int esquerda = 2 * index + 1;
     int direita = 2 * index + 2;
 
-    if (esquerda < tamanho) {
-        bool shouldSwap = false;
-        for (int i = 0; i < 5; ++i) {
-            if (eventos[esquerda].tempoInicio[i] < eventos[menor].tempoInicio[i]) {
-                shouldSwap = true;
-                break;
-            } else if (eventos[esquerda].tempoInicio[i] > eventos[menor].tempoInicio[i]) {
-                break;
-            }
-        }
-        if (shouldSwap) {
-            menor = esquerda;
-        }
+    if (esquerda < tamanhoAtual && desempata(eventos[esquerda], eventos[menor])) {
+        menor = esquerda;
     }
 
-    if (direita < tamanho) {
-        bool shouldSwap = false;
-        for (int i = 0; i < 5; ++i) {
-            if (eventos[direita].tempoInicio[i] < eventos[menor].tempoInicio[i]) {
-                shouldSwap = true;
-                break;
-            } else if (eventos[direita].tempoInicio[i] > eventos[menor].tempoInicio[i]) {
-                break;
-            }
-        }
-        if (shouldSwap) {
-            menor = direita;
-        }
+    if (direita < tamanhoAtual && desempata(eventos[direita], eventos[menor])) {
+        menor = direita;
     }
 
     if (menor != index) {

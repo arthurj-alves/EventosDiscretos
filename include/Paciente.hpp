@@ -2,19 +2,14 @@
 #define PACIENTE_HPP
 
 #include <string>
-#include "Suporte.hpp"
 
 class Paciente {
 private:
     std::string id; // Identificador único do paciente
     bool alta; // Indica se teve alta após o atendimento
-    int* tempoAdmissao; // Data e hora de admissão
+    double tempoAdmissao; // Data e hora de admissão
     int grauUrgencia; // Grau de urgência: 0 - Verde, 1 - Amarelo, 2 - Vermelho
     int medidasHospitalares, testesLaboratorio, examesImagem, instrumentosMedicamentos; // Quantidades de procedimentos
-    
-    // Estado
-    std::string estadoAtual; 
-    int* proximoTempo;
 
     // Estatística
     double tempoEspera; // Tempo total em espera
@@ -22,35 +17,33 @@ private:
     double tempoTotal; // Tempo total no hospital (permanência + espera)
 
     // Hora de saída
-    int* tempoSaida;
+    double tempoSaida;
+    double tempoFila;
 
 public:
     // Construtor
     Paciente(const std::string& id, bool alta, int ano, int mes, int dia, int hora, 
              int grau, int mh, int tl, int ei, int im);
 
-    // Métodos para calcular tempos de saída do paciente
+/*     // Métodos para calcular tempos de saída do paciente
     void calcularTempos(double tempoTriagem, double tempoAtendimento, double tempoMH,
                         double tempoTL, double tempoEI, double tempoIM);
-    int* calcularProximoEvento(int tempoInicio[5], double tempoMedio);
-
+ */
     // Setter
+    void setTempoFila(double tempo);
     void setTempoEspera(double tempo);
-
-
-    // Estado 
-    void avancarEstado();        // Avança para o próximo estado
-    void setEstado(std::string estado);  // Define diretamente um estado
-    std::string getEstado() const;       // Retorna o estado atual
-    
+    void setTempoAtendido(double tempo);
+    void setTempoSaida(double tempo);
+    void setTempoTotal(double tempo);
 
     // Getters
+    double getTempoFila() const;
     double getTempoEspera() const;
     double getTempoAtendido() const;
     double getTempoTotal() const;
     std::string getId() const;
     bool getAlta() const;
-    int* getTempoAdmissao() const;
+    double getTempoAdmissao() const;
     int getGrauUrgencia() const;
     int getMedidasHospitalares() const;
     int getTestesLaboratorio() const;
